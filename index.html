@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>3D Bubble Chatbot</title>
+  <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      width: 100%;
+      font-family: 'Segoe UI', Tahoma, sans-serif;
+      overflow: hidden;
+    }
+
+    #background {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      z-index: -1;
+      background: black; /* Dark to highlight bubbles */
+    }
+
+    /* Chat container */
+    .chat-container {
+      position: relative;
+      width: 420px;
+      height: 600px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 20px;
+      box-shadow: 0 15px 40px rgba(0,0,0,0.6);
+      backdrop-filter: blur(15px);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      margin: auto;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+
+    /* Header */
+    .chat-header {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(15, 23, 42, 0.9);
+      padding: 20px;
+      color: cyan;
+      font-weight: bold;
+      font-size: 20px;
+      border-bottom: 2px solid rgba(255,255,255,0.2);
+      position: relative;
+    }
+
+    .bot-face {
+      width: 60px;
+      height: 60px;
+      border-radius: 15px;
+      background: linear-gradient(145deg, #111, #222);
+      margin-right: 15px;
+      position: relative;
+      box-shadow: inset 0 0 15px rgba(0,255,255,0.7);
+    }
+    .eye {
+      width: 12px;
+      height: 12px;
+      background: cyan;
+      border-radius: 50%;
+      position: absolute;
+      top: 20px;
+      animation: blink 3s infinite;
+      box-shadow: 0 0 8px cyan, 0 0 20px cyan;
+    }
+    .eye.left { left: 15px; }
+    .eye.right { right: 15px; }
+
+    @keyframes blink {
+      0%, 90%, 100% { height: 12px; }
+      95% { height: 2px; }
+    }
+
+    /* Chat box */
+    .chat-box {
+      flex: 1;
+      padding: 15px;
+      overflow-y: auto;
+    }
+
+    .message {
+      margin: 10px 0;
+      padding: 12px 16px;
+      border-radius: 20px;
+      max-width: 75%;
+      word-wrap: break-word;
+      font-size: 14px;
+    }
+    /* User message */
+    .user {
+      background: linear-gradient(145deg, #06b6d4, #3b82f6);
+      color: white;
+      align-self: flex-end;
+      border-bottom-right-radius: 5px;
+      box-shadow: 0 0 10px rgba(59,130,246,0.7);
+    }
+    /* Bot message (black text on light bubble-like bg) */
+    .bot {
+      background: rgba(255, 255, 255, 0.85);
+      color: black;
+      align-self: flex-start;
+      border: 1px solid rgba(0,0,0,0.2);
+      border-bottom-left-radius: 5px;
+      box-shadow: 0 0 10px rgba(255,255,255,0.5);
+    }
+
+    /* Input */
+    .input-box {
+      display: flex;
+      border-top: 1px solid rgba(255,255,255,0.3);
+      background: rgba(0,0,0,0.6);
+      padding: 10px;
+    }
+    input {
+      flex: 1;
+      padding: 12px;
+      border: none;
+      outline: none;
+      font-size: 14px;
+      color: cyan;
+      background: transparent;
+      border-bottom: 2px solid cyan;
+    }
+    input:focus {
+      border-color: #3b82f6;
+    }
+    button {
+      padding: 12px 20px;
+      border: none;
+      margin-left: 10px;
+      background: linear-gradient(145deg, #06b6d4, #3b82f6);
+      color: white;
+      font-weight: bold;
+      border-radius: 8px;
+      cursor: pointer;
+      box-shadow: 0 0 15px rgba(59,130,246,0.8);
+      transition: 0.3s;
+    }
+    button:hover {
+      transform: scale(1.05);
+      background: linear-gradient(145deg, #3b82f6, #06b6d4);
+    }
+  </style>
+</head>
+<body>
+  <!-- Background -->
+  <div id="background"></div>
+
+  <!-- Chatbot -->
+  <div class="chat-container">
+    <div class="chat-header">
+      <div class="bot-face">
+        <div class="eye left"></div>
+        <div class="eye right"></div>
+      </div>
+      🤖 BubbleBot
+    </div>
+    <div class="chat-box" id="chatBox"></div>
+    <div class="input-box">
+      <input type="text" id="userInput" placeholder="Type your message...">
+      <button onclick="sendMessage()">➤</button>
+    </div>
+  </div>
+
+  <!-- Bubble Background using particles.js -->
+  <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+  <script>
+    particlesJS("background", {
+      "particles": {
+        "number": { "value": 60, "density": { "enable": true, "value_area": 800 } },
+        "color": { "value": ["#ff00ff", "#00ffff", "#ffff00", "#ff8800", "#00ff88"] },
+        "shape": { "type": "circle" },
+        "opacity": { "value": 0.6, "random": true },
+        "size": { "value": 20, "random": true },
+        "line_linked": { "enable": false },
+        "move": {
+          "enable": true,
+          "speed": 2,
+          "direction": "none",
+          "random": true,
+          "straight": false,
+          "out_mode": "out",
+          "bounce": false
+        }
+      },
+      "interactivity": {
+        "events": {
+          "onhover": { "enable": true, "mode": "repulse" },
+          "onclick": { "enable": true, "mode": "push" },
+          "resize": true
+        }
+      },
+      "retina_detect": true
+    });
+  </script>
+
+  <!-- Chatbot JS -->
+  <script>
+    const chatBox = document.getElementById("chatBox");
+
+    function addMessage(text, sender) {
+      const msg = document.createElement("div");
+      msg.classList.add("message", sender);
+      msg.innerText = text;
+      chatBox.appendChild(msg);
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    function sendMessage() {
+      const input = document.getElementById("userInput");
+      const userText = input.value.trim();
+      if (userText === "") return;
+
+      addMessage(userText, "user");
+      input.value = "";
+
+      let botResponse = "";
+      if (/hello|hi/i.test(userText)) {
+        botResponse = "Hello 👋! I'm  Smart ChatBot.";
+      } else if (/how are you/i.test(userText)) {
+        botResponse = "I'm doing great 🤖✨! How about you?";
+      } else if (/your name/i.test(userText)) {
+        botResponse = "I’m Smart ChatBot, your assistant!";
+      } else if (/bye/i.test(userText)) {
+        botResponse = "Goodbye 👋! Stay Tuned!";
+      } else {
+        botResponse = "🤔 I didn’t quite get that. Try asking me something else.";
+      }
+      setTimeout(() => addMessage(botResponse, "bot"), 600);
+    }
+
+    document.getElementById("userInput")
+      .addEventListener("keypress", function(e) {
+        if (e.key === "Enter") sendMessage();
+      });
+  </script>
+</body>
+</html>
