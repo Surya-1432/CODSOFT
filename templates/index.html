@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Movie Recommendation System</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; background: #f4f4f9; }
+        h1 { color: #333; }
+        input[type=text] { padding: 8px; width: 300px; }
+        button { padding: 8px 16px; background: #4CAF50; color: white; border: none; cursor: pointer; }
+        ul { list-style-type: none; padding: 0; }
+        li { background: #fff; padding: 10px; margin: 5px 0; border-radius: 6px; box-shadow: 0px 1px 3px rgba(0,0,0,0.1); }
+        #results { margin-top: 20px; }
+        p.error { color: red; }
+    </style>
+</head>
+<body>
+    <h1>🎬 Movie Recommendation System</h1>
+    <input type="text" id="movieInput" placeholder="Enter movie title...">
+    <button onclick="getRecommendations()">Get Recommendations</button>
+    <div id="results"></div>
+
+    <script>
+        async function getRecommendations() {
+            const movie = document.getElementById("movieInput").value.trim();
+            if (!movie) return;
+            const resultsDiv = document.getElementById("results");
+            resultsDiv.innerHTML = "Loading recommendations...";
+
+            try {
+                const response = await fetch("/recommend", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ movie: movie })
+                });
+
+                if (!response.ok) {
+                    resultsDiv.innerHTML = `<p class="error">Error: ${response.status} ${response.statusText}</p>`;
+                    return;
+                }
+
+                const data = await response.json();
+
+                if (data.recommendations.length === 0) {
+                    resultsDiv.innerHTML = `<p class="error">❌ Movie not found in dataset</p>`;
+                    return;
+                }
+
+                let html = `<h2>Recommendations for "${data.movie}":</h2><ul>`;
+                data.recommendations.forEach(rec => {
+                    html += `<li>${rec}</li>`;
+                });
+                html += "</ul>";
+                resultsDiv.innerHTML = html;
+
+            } catch (error) {
+                resultsDiv.innerHTML = `<p class="error">Error fetching recommendations: ${error.message}</p>`;
+            }
+        }
+    </script>
+</body>
+</html>
