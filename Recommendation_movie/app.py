@@ -9,7 +9,7 @@ app = Flask(__name__)
 # CORS(app)
 
 # Load Data
-movies = pd.read_csv("D:/Codsoft intern/Recommdation_movie/u.item", sep="|", header=None, encoding="latin-1")
+movies = pd.read_csv("D:/Codsoft intern/Recommdation_movie/Recommendation_movie/u.item", sep="|", header=None, encoding="latin-1")
 movies = movies[[0, 1]]
 movies.columns = ["movie_id", "title"]
 
